@@ -214,6 +214,72 @@ updateAccordion(index){
 
 }
 
+goto(index){
+
+    if(this.state.mobile) return;
+
+    if(this.state.animating) return;
+
+    if(index<0) return;
+
+    if(index>=this.dom.views.length) return;
+
+    this.beforeChange(
+        this.state.activeIndex,
+        index
+    );
+
+}
+
+beforeChange(oldIndex,newIndex){
+
+    this.state.animating = true;
+
+    this.state.activeIndex = newIndex;
+
+    this.updateViews(newIndex);
+
+    this.updateAccordion(newIndex);
+
+    this.scrollToView(newIndex);
+
+}
+
+scrollToView(index){
+
+    const view =
+        this.dom.views[index];
+
+    if(!view){
+
+        this.afterChange();
+
+        return;
+
+    }
+
+    this.dom.viewer.scrollTo({
+
+        top:view.offsetTop,
+
+        behavior:"smooth"
+
+    });
+
+    setTimeout(()=>{
+
+        this.afterChange();
+
+    },500);
+
+}
+
+afterChange(){
+
+    this.state.animating = false;
+
+}
+
 updateLayout(){
 
     if(!this.dom.layout) return;
