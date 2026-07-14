@@ -74,6 +74,8 @@ const WinnerEngine = {
 
     this.updateLayout();
 
+    this.checkResponsive();
+
     console.log("Winner Engine v3 initialized");
 
 },
@@ -232,7 +234,58 @@ updateLayout(){
 
     }
 
-}
+},
+
+checkResponsive(){
+
+    const mobile =
+        window.innerWidth <= 767;
+
+    if(mobile){
+
+        if(!this.state.mobile){
+
+            this.enableMobile();
+
+        }
+
+    }else{
+
+        if(this.state.mobile){
+
+            this.disableMobile();
+
+        }
+
+    }
+
+},
+
+
+enableMobile(){
+
+    this.state.mobile = true;
+
+    this.state.device = "mobile";
+
+    this.dom.layout.classList.add(
+        "winner-mobile"
+    );
+
+},
+
+
+disableMobile(){
+
+    this.state.mobile = false;
+
+    this.state.device = "desktop";
+
+    this.dom.layout.classList.remove(
+        "winner-mobile"
+    );
+
+},
 
 bindEvents(){
 
@@ -246,6 +299,8 @@ bindEvents(){
 onResize(){
 
     this.updateLayout();
+
+    this.checkResponsive();
 
 },
 
