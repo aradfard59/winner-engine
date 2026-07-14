@@ -72,6 +72,8 @@ const WinnerEngine = {
     this.state.activeIndex
 );
 
+    this.updateLayout();
+
     console.log("Winner Engine v3 initialized");
 
 },
@@ -210,6 +212,28 @@ updateAccordion(index){
 
 }
 
+updateLayout(){
+
+    if(!this.dom.layout) return;
+
+
+    this.state.viewportHeight =
+        window.innerHeight;
+
+
+    this.dom.layout.style.height =
+        this.state.viewportHeight + "px";
+
+
+    if(this.dom.viewer){
+
+        this.dom.viewer.style.height =
+            this.state.viewportHeight + "px";
+
+    }
+
+}
+
 bindEvents(){
 
     window.addEventListener(
@@ -221,8 +245,7 @@ bindEvents(){
 
 onResize(){
 
-    this.state.viewportHeight =
-        window.innerHeight;
+    this.updateLayout();
 
 },
 
