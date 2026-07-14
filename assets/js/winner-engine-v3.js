@@ -130,7 +130,7 @@ cacheDOM(){
         )];
 
 
-}
+},
 
 updateViews(index){
 
@@ -164,7 +164,7 @@ updateViews(index){
 
     });
 
-}
+},
 
 updateAccordion(index){
 
@@ -212,7 +212,7 @@ updateAccordion(index){
 
     });
 
-}
+},
 
 goto(index){
 
@@ -224,12 +224,14 @@ goto(index){
 
     if(index>=this.dom.views.length) return;
 
+    if(index===this.state.activeIndex) return;
+
     this.beforeChange(
         this.state.activeIndex,
         index
     );
 
-}
+},
 
 beforeChange(oldIndex,newIndex){
 
@@ -243,7 +245,7 @@ beforeChange(oldIndex,newIndex){
 
     this.scrollToView(newIndex);
 
-}
+},
 
 scrollToView(index){
 
@@ -272,13 +274,13 @@ scrollToView(index){
 
     },500);
 
-}
+},
 
 afterChange(){
 
     this.state.animating = false;
 
-}
+},
 
 updateLayout(){
 
@@ -382,33 +384,6 @@ disableMobile(){
 
 },
 
-moveSectionsForMobile(){
-
-    this.dom.sections.forEach((section,index)=>{
-
-        const view = this.dom.views[index];
-
-        if(!view) return;
-
-        if(view.nextElementSibling!==section){
-
-            view.after(section);
-
-        }
-
-    });
-
-},
-
-restoreSections(){
-
-    this.dom.sections.forEach(section=>{
-
-        this.dom.accordion.appendChild(section);
-
-    });
-
-},
 
 bindEvents(){
 
@@ -416,6 +391,32 @@ bindEvents(){
         "resize",
         ()=>this.onResize()
     );
+
+
+    this.dom.sections.forEach((section,index)=>{
+
+
+        const header =
+            section.querySelector(
+                ".winner-header"
+            );
+
+
+        if(!header) return;
+
+
+        header.addEventListener(
+            "click",
+            ()=>{
+
+                this.goto(index);
+
+            }
+        );
+
+
+    });
+
 
 },
 
