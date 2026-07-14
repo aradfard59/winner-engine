@@ -272,6 +272,10 @@ enableMobile(){
         "winner-mobile"
     );
 
+    this.dom.rail.style.display = "none";
+
+    this.moveSectionsForMobile();
+
 },
 
 
@@ -284,6 +288,38 @@ disableMobile(){
     this.dom.layout.classList.remove(
         "winner-mobile"
     );
+
+    this.dom.rail.style.display = "";
+
+    this.restoreSections();
+
+},
+
+moveSectionsForMobile(){
+
+    this.dom.sections.forEach((section,index)=>{
+
+        const view = this.dom.views[index];
+
+        if(!view) return;
+
+        if(view.nextElementSibling!==section){
+
+            view.after(section);
+
+        }
+
+    });
+
+},
+
+restoreSections(){
+
+    this.dom.sections.forEach(section=>{
+
+        this.dom.accordion.appendChild(section);
+
+    });
 
 },
 
