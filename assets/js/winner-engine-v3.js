@@ -226,6 +226,12 @@ goto(index){
 
     if(index===this.state.activeIndex) return;
 
+    this.changeView(index);
+
+},
+
+changeView(index){
+
     this.beforeChange(
         this.state.activeIndex,
         index
