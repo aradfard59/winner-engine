@@ -120,6 +120,40 @@ cacheDOM(){
 
 }
 
+updateViews(index){
+
+    this.state.activeIndex = index;
+
+    this.dom.views.forEach((view,i)=>{
+
+        view.classList.remove(
+            "winner-active",
+            "winner-near"
+        );
+
+        if(i===index){
+
+            view.classList.add(
+                "winner-active"
+            );
+
+        }else if(
+
+            i===index-1 ||
+            i===index+1
+
+        ){
+
+            view.classList.add(
+                "winner-near"
+            );
+
+        }
+
+    });
+
+}
+
 bindEvents(){
 
     window.addEventListener(
@@ -149,3 +183,4 @@ WinnerEngine.init();
 
 
 })();
+
