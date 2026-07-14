@@ -57,6 +57,11 @@ const WinnerEngine = {
 
     this.cacheDOM();
 
+    this.bindEvents();
+
+    this.state.viewportHeight =
+        window.innerHeight;
+
     this.state.initialized = true;
 
     console.log("Winner Engine v3 initialized");
@@ -67,6 +72,7 @@ const WinnerEngine = {
 cacheDOM(){
 
 
+    
     this.dom.layout =
         document.querySelector(
             ".winner-layout"
@@ -113,6 +119,22 @@ cacheDOM(){
 
 
 }
+
+bindEvents(){
+
+    window.addEventListener(
+        "resize",
+        ()=>this.onResize()
+    );
+
+},
+
+onResize(){
+
+    this.state.viewportHeight =
+        window.innerHeight;
+
+},
 
 
 };
