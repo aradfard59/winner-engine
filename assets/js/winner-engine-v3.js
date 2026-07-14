@@ -64,6 +64,14 @@ const WinnerEngine = {
 
     this.state.initialized = true;
 
+    this.updateViews(
+    this.state.activeIndex
+);
+
+    this.updateAccordion(
+    this.state.activeIndex
+);
+
     console.log("Winner Engine v3 initialized");
 
 },
@@ -149,6 +157,54 @@ updateViews(index){
             );
 
         }
+
+    });
+
+}
+
+updateAccordion(index){
+
+    this.state.activeIndex = index;
+
+
+    this.dom.sections.forEach((section,i)=>{
+
+
+        const body =
+            section.querySelector(
+                ".winner-body"
+            );
+
+
+        if(!body) return;
+
+
+        if(i===index){
+
+
+            section.classList.add(
+                "active"
+            );
+
+
+            body.style.height =
+                body.scrollHeight + "px";
+
+
+        }else{
+
+
+            section.classList.remove(
+                "active"
+            );
+
+
+            body.style.height =
+                "0px";
+
+
+        }
+
 
     });
 
