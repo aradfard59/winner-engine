@@ -272,9 +272,20 @@ enableMobile(){
         "winner-mobile"
     );
 
-    this.dom.rail.style.display = "none";
+    if(this.dom.rail){
 
-    this.moveSectionsForMobile();
+        this.dom.rail.style.display = "none";
+
+    }
+
+    this.dom.views.forEach(view=>{
+
+        view.classList.remove(
+            "winner-active",
+            "winner-near"
+        );
+
+    });
 
 },
 
@@ -289,9 +300,19 @@ disableMobile(){
         "winner-mobile"
     );
 
-    this.dom.rail.style.display = "";
+    if(this.dom.rail){
 
-    this.restoreSections();
+        this.dom.rail.style.display = "";
+
+    }
+
+    this.updateViews(
+        this.state.activeIndex
+    );
+
+    this.updateAccordion(
+        this.state.activeIndex
+    );
 
 },
 
