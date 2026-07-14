@@ -1,0 +1,962 @@
+/* ==========================================================
+   WINNER ENGINE V2
+========================================================== */
+
+:root{
+
+    --winner-view-width:60%;
+    --winner-info-width:40%;
+    --winner-rail-width:56px;
+
+    --winner-speed:.65s;
+
+    --winner-ease:cubic-bezier(.22,.61,.36,1);
+
+}
+
+
+/* ==========================================================
+   LAYOUT
+========================================================== */
+
+.winner-layout{
+
+    position:relative;
+
+    display:flex;
+
+    flex-direction:row;
+
+    align-items:stretch;
+
+    width:100%;
+
+    height:var(--winner-height);
+
+    overflow:hidden;
+
+    background:#fff;
+    
+}
+
+/* ==========================================================
+   VIEWER
+========================================================== */
+
+.winner-viewer{
+
+    position:relative;
+
+    flex:1 1 100%;
+
+    width:100%;
+
+    height:var(--winner-height) !important;
+
+    overflow:hidden;
+
+    transition:
+        flex var(--winner-speed) var(--winner-ease);
+
+}
+
+
+/* ==========================================================
+   VIEW
+========================================================== */
+
+.winner-view{
+
+    position:relative;
+
+    width:100%;
+
+    height:var(--winner-height) !important;
+
+    overflow:hidden;
+
+}
+
+.winner-view{
+    min-height:var(--winner-vh);
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+}
+
+.winner-view-scroll{
+
+    width:100%;
+
+    height:var(--winner-height) !important;
+
+    overflow-y:auto;
+
+    scrollbar-width:none;
+
+    -ms-overflow-style:none;
+
+}
+
+.winner-view-scroll::-webkit-scrollbar{
+
+    display:none;
+
+}
+
+
+
+
+/* ==========================================================
+   VIEW STATES
+========================================================== */
+
+body:not(.elementor-editor-active)
+.winner-view{
+
+    transition:
+
+        opacity .35s ease,
+
+        transform .45s var(--winner-ease);
+
+}
+
+
+body:not(.elementor-editor-active)
+.winner-view:not(.winner-active):not(.winner-near){
+
+    opacity:.15;
+
+    pointer-events:none;
+
+}
+
+
+body:not(.elementor-editor-active)
+.winner-view.winner-near{
+
+    opacity:.45;
+
+}
+
+
+body:not(.elementor-editor-active)
+.winner-view.winner-active{
+
+    opacity:1;
+
+}
+
+/* ==========================================================
+   RAIL
+========================================================== */
+
+.winner-rail{
+
+    position:relative;
+
+    flex:0 0 var(--winner-rail-width);
+
+    width:var(--winner-rail-width);
+
+    height:var(--winner-height);
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+    background:transparent;
+
+    border:none;
+
+    overflow:hidden;
+
+    z-index:20;
+
+}
+
+
+/* ==========================================================
+   TOGGLE
+========================================================== */
+
+.winner-toggle{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    width:100%;
+
+    min-height:64px;
+
+    flex:0 0 64px;
+
+    font-size:28px;
+
+    font-weight:300;
+
+    line-height:1;
+
+    cursor:pointer;
+
+    user-select:none;
+
+    color:inherit;
+
+    transform:rotate(90deg);
+
+    transition:
+        opacity .30s ease,
+        color .30s ease,
+        font-weight .30s ease;
+
+}
+
+/* ==========================================================
+   RAIL BOTTOM
+========================================================== */
+
+.winner-rail-bottom{
+
+    position:absolute;
+
+    bottom:24px;
+
+    left:50%;
+
+    transform:translateX(-50%);
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    gap:18px;
+
+}
+
+
+/* ==========================================================
+   INFO / CLOSE
+========================================================== */
+
+.winner-info,
+.winner-close{
+
+    writing-mode:vertical-rl;
+    text-orientation:mixed;
+
+    font-size:16px;
+    font-family:"IRANSans", sans-serif;
+
+    font-weight:400;
+
+    letter-spacing:.15em;
+
+    cursor:pointer;
+
+    transition:
+        opacity .25s ease,
+        font-weight .3s ease;
+
+}
+
+
+.winner-info:hover,
+.winner-close:hover{
+
+    opacity:.65;
+
+}
+
+/* ==========================================
+   RAIL ACTIVE WEIGHT
+========================================== */
+
+.winner-layout:not(.winner-expanded) .winner-toggle,
+.winner-layout:not(.winner-expanded) .winner-info{
+
+    font-weight:700;
+
+}
+
+.winner-layout.winner-expanded .winner-toggle,
+.winner-layout.winner-expanded .winner-close{
+
+    font-weight:400;
+
+}
+
+
+/* ==========================================================
+   ACCORDION
+========================================================== */
+
+.winner-accordion{
+
+    position:relative;
+
+    flex:0 0 0;
+
+    min-width:0;
+
+    width:auto;
+
+    height:var(--winner-height);
+
+    overflow:hidden;
+
+    opacity:0;
+
+    pointer-events:none;
+
+    background:#fff;
+
+    transition:
+
+        flex-basis var(--winner-speed) var(--winner-ease),
+
+        opacity 1.2s ease;
+
+}
+
+/* body */
+.winner-body{
+    overflow:hidden;
+}
+
+/* ==========================================
+   BODY ANIMATION
+========================================== */
+
+.winner-body{
+
+    opacity:0;
+    transform:translateY(18px);
+
+    transition:
+        opacity 5 ease,
+        transform .45s ease;
+
+}
+
+.winner-section.active .winner-body{
+
+    opacity:1;
+    transform:translateY(0);
+
+}
+
+
+/* ==========================================================
+   EXPANDED
+========================================================== */
+
+.winner-layout.winner-expanded
+.winner-viewer{
+
+    flex-basis:var(--winner-view-width);
+
+}
+
+
+.winner-layout.winner-expanded
+.winner-accordion{
+
+    flex-basis:var(--winner-info-width);
+
+    opacity:1;
+
+    pointer-events:auto;
+
+}
+
+
+/* ==========================================================
+   COLLAPSED
+========================================================== */
+
+.winner-layout:not(.winner-expanded)
+.winner-viewer{
+
+    flex:1 1 auto;
+
+}
+
+
+.winner-layout:not(.winner-expanded)
+.winner-accordion{
+
+    flex-basis:0;
+
+    opacity:0;
+
+    pointer-events:none;
+
+}
+
+/* ==========================================================
+   SECTIONS
+========================================================== */
+
+.winner-section{
+
+    display:flex;
+    flex-direction:column;
+
+}
+
+.winner-section.active{
+
+    height:100%;
+
+}
+
+.winner-section.active .winner-body{
+
+    flex:1;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+
+}
+
+
+/* ==========================================
+   ELEMENTOR EDITOR FIX
+========================================== */
+
+.elementor-editor-active .winner-section{
+
+    opacity:1 !important;
+
+    transform:none !important;
+
+}
+
+/* ==========================================
+   HEADER
+========================================== */
+
+.winner-header{
+
+    display:inline-block;
+
+    cursor:pointer;
+
+    user-select:none;
+
+    font-size:18px;
+
+    font-weight:300;
+
+    transform-origin:right center;
+
+    transition:
+        font-size .35s ease,
+        font-weight .35s ease,
+        opacity .35s ease,
+        transform .35s ease;
+
+}
+
+.winner-header:hover{
+
+    opacity:.8;
+
+}
+
+/* هدرهای معمولی */
+
+.winner-header,
+.winner-header *{
+
+    font-size:18px !important;
+
+    font-weight:300 !important;
+
+    transition:
+        font-size .35s ease,
+        font-weight .35s ease;
+
+}
+
+
+/* هدر فعال */
+
+.winner-section.active .winner-header,
+.winner-section.active .winner-header *{
+
+    font-size:22px !important;
+
+    font-weight:700 !important;
+
+}
+
+/* ==========================================================
+   BODY
+========================================================== */
+
+.winner-body{
+
+    flex:1;
+
+    height:0;
+
+    opacity:0;
+
+    overflow:hidden;
+
+    transition:
+
+        height .45s var(--winner-ease),
+
+        opacity .35s ease;
+
+}
+
+
+.winner-section.active
+.winner-body{
+
+    opacity:1;
+
+    overflow-y:auto;
+
+    scrollbar-width:none;
+
+    -ms-overflow-style:none;
+
+}
+
+
+.winner-section.active
+.winner-body::-webkit-scrollbar{
+
+    display:none;
+
+}
+
+
+/* ==========================================================
+   VIDEOS / IMAGES
+========================================================== */
+
+.winner-view img,
+.winner-view video{
+
+    display:block;
+
+    width:100%;
+
+    height:auto;
+
+}
+
+
+.winner-view video{
+
+    object-fit:cover;
+
+}
+
+/* ==========================================================
+   RTL / LTR
+========================================================== */
+
+html[dir="rtl"] .winner-layout{
+
+    direction:rtl;
+
+}
+
+html[dir="rtl"] .winner-indicator{
+
+    right:0;
+
+    left:auto;
+
+}
+
+html[dir="rtl"] .winner-toggle{
+
+    transform:rotate(90deg);
+
+}
+
+html[dir="rtl"] .winner-layout.winner-expanded
+.winner-toggle{
+
+    transform:rotate(0deg);
+
+}
+
+
+
+html:not([dir="rtl"]) .winner-layout{
+
+    direction:ltr;
+
+}
+
+html:not([dir="rtl"]) .winner-indicator{
+
+    left:0;
+
+    right:auto;
+
+}
+
+html:not([dir="rtl"]) .winner-toggle{
+
+    transform:rotate(-90deg);
+
+}
+
+html:not([dir="rtl"]) .winner-layout.winner-expanded
+.winner-toggle{
+
+    transform:rotate(0deg);
+
+}
+
+
+
+/* ==========================================================
+   ELEMENTOR
+========================================================== */
+
+body.elementor-editor-active .winner-layout{
+
+    display:flex;
+
+    height:auto;
+
+    overflow:visible;
+
+}
+
+body.elementor-editor-active .winner-viewer{
+
+    flex:1 1 auto !important;
+
+    width:100% !important;
+
+    height:auto !important;
+
+    overflow:visible !important;
+
+}
+
+body.elementor-editor-active .winner-view{
+
+    height:auto !important;
+
+    min-height:700px;
+
+    opacity:1 !important;
+
+    transform:none !important;
+
+    pointer-events:auto !important;
+
+}
+
+body.elementor-editor-active .winner-view-scroll{
+
+    height:auto !important;
+
+    overflow:visible !important;
+
+}
+
+body.elementor-editor-active .winner-rail{
+
+    display:flex !important;
+
+}
+
+body.elementor-editor-active .winner-accordion{
+
+    flex:0 0 40% !important;
+
+    opacity:1 !important;
+
+    pointer-events:auto !important;
+
+    overflow:visible !important;
+
+}
+
+body.elementor-editor-active .winner-body{
+
+    height:auto !important;
+
+    opacity:1 !important;
+
+    overflow:visible !important;
+
+}
+
+
+
+/* ==========================================================
+   MOBILE / TABLET
+========================================================== */
+
+@media (max-width:1024px){
+
+    .winner-layout{
+
+        display:block;
+        width:100%;
+        height:auto;
+        overflow:visible;
+
+    }
+
+    .winner-viewer{
+
+        display:block;
+        width:100%;
+        height:auto;
+        overflow:visible;
+
+    }
+
+    .winner-view{
+
+        display:block;
+        width:100%;
+        min-width:100%;
+        max-width:100%;
+        height:auto;
+        min-height:100vh;
+
+        opacity:1 !important;
+        transform:none !important;
+        pointer-events:auto !important;
+
+    }
+
+    .winner-view-scroll{
+
+        width:100%;
+        height:auto;
+        overflow:visible;
+
+    }
+
+    .winner-rail{
+
+        display:none !important;
+
+    }
+
+    .winner-accordion{
+
+        display:block;
+        width:100%;
+        height:auto;
+
+        flex:none;
+
+        opacity:1 !important;
+        overflow:visible;
+        pointer-events:auto;
+
+        background:transparent;
+
+    }
+
+    .winner-section{
+
+        display:block;
+        width:100%;
+        margin:0 0 40px;
+
+        flex:none !important;
+
+    }
+
+    .winner-header{
+
+        margin-bottom:20px;
+
+    }
+
+    .winner-body{
+
+        display:block !important;
+
+        width:100%;
+        max-width:100%;
+
+        height:auto !important;
+
+        opacity:1 !important;
+
+        overflow:visible !important;
+
+        overflow-x:hidden;
+
+    }
+
+
+    /* Elementor Templates */
+
+    .winner-view .elementor,
+    .winner-view .elementor-template,
+    .winner-view .elementor-widget,
+    .winner-view .elementor-widget-container{
+
+        width:100% !important;
+        max-width:100% !important;
+
+    }
+
+    .winner-body *{
+
+        box-sizing:border-box;
+
+        min-width:0;
+
+        max-width:100%;
+
+    }
+
+    .winner-body .e-con{
+
+        width:100% !important;
+        max-width:100% !important;
+        min-width:0 !important;
+
+    }
+    
+     /* غیرفعال شدن ترنزیشن هدرها */
+    .winner-header,
+    .winner-header h2{
+        transition: none !important;
+        animation: none !important;
+    }
+
+    /* همه هدرها یک اندازه و وزن ثابت داشته باشند */
+    .winner-header h2,
+    .winner-section.active .winner-header h2{
+        font-size: 24px !important;
+        font-weight: 600 !important;
+        line-height: 1.2;
+        transform: none !important;
+        scale: 1 !important;
+        opacity: 1 !important;
+    }
+    
+    .winner-section.active .winner-body{
+
+        display:block;
+        flex:none;
+
+        justify-content:initial;
+        align-items:initial;
+
+        width:100%;
+        max-width:100%;
+
+        margin:0;
+        padding:0;
+
+    }
+
+    .winner-mobile .winner-body > *{
+
+    width:100%;
+    max-width:100%;
+    box-sizing:border-box;
+
+}
+
+/* ==========================================
+   FIX ELEMENTOR HORIZONTAL OFFSET
+========================================== */
+
+.winner-mobile .winner-body,
+.winner-mobile .winner-body .elementor,
+.winner-mobile .winner-body .elementor-section,
+.winner-mobile .winner-body .elementor-container,
+.winner-mobile .winner-body .e-con,
+.winner-mobile .winner-body .elementor-widget-wrap{
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+
+    margin-left:0 !important;
+    margin-right:0 !important;
+
+    padding-left:0 !important;
+    padding-right:0 !important;
+
+    transform:none !important;
+    left:auto !important;
+    right:auto !important;
+}
+
+.winner-mobile .winner-body{
+    overflow-x:hidden !important;
+}
+
+}
+
+
+@media (min-width:1025px){
+
+    .winner-layout{
+
+        display:flex;
+
+    }
+
+    .winner-rail{
+
+        display:flex;
+
+    }
+    
+
+}
+
+/* ==========================================================
+   PERFORMANCE
+========================================================== */
+
+.winner-layout,
+.winner-viewer,
+.winner-accordion{
+
+    will-change:flex-basis,opacity;
+
+}
+
+.winner-view{
+
+    will-change:opacity;
+
+}
+
+.winner-layout *{
+
+    box-sizing:border-box;
+
+}
+
+
+
