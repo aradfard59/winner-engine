@@ -13,15 +13,21 @@ const WinnerEngine = {
 
     state:{
 
+    device:"desktop",
 
-        mobile:false,
+    mobile:false,
 
-        activeIndex:0,
+    activeIndex:0,
 
-        animating:false
+    animating:false,
 
+    expanded:false,
 
-    },
+    viewportHeight:0,
+
+    initialized:false
+
+},
 
 
     dom:{
@@ -49,14 +55,11 @@ const WinnerEngine = {
 
     init(){
 
-
     this.cacheDOM();
 
+    this.state.initialized = true;
 
-    console.log(
-        "Winner Engine v3 initialized"
-    );
-
+    console.log("Winner Engine v3 initialized");
 
 },
 
