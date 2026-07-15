@@ -11,6 +11,15 @@
 const WinnerEngine = {
 
 
+    config:{
+
+    scrollDuration:500,
+
+    accordionDelay:180
+
+},
+
+
     state:{
 
     device:"desktop",
@@ -25,13 +34,13 @@ const WinnerEngine = {
 
     viewportHeight:0,
 
-    initialized:false
+    initialized:false,
 
     wheelLocked:false,
 
 },
 
-
+    
     dom:{
 
 
@@ -280,7 +289,7 @@ scrollToView(index){
 
         this.afterChange();
 
-    },500);
+    },this.config.scrollDuration);
 
 },
 
@@ -480,7 +489,7 @@ onWheel(e){
 
         this.state.wheelLocked = false;
 
-    },600);
+    },this.config.scrollDuration);
 
 },
 
