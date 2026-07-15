@@ -45,6 +45,10 @@ state:{
 
     swipeThreshold:60
 
+    layoutExpanded:false,
+
+    firstInteraction:true,
+
 },
 
 
@@ -127,6 +131,15 @@ cacheDOM(){
 },
 
 
+getActiveView(){
+
+    return this.dom.views[
+        this.state.activeIndex
+    ];
+
+},
+
+
 
 updateViews(index){
 
@@ -190,18 +203,78 @@ updateAccordion(index){
 
 },
 
-goto(index){
 
+expandLayout(){
+
+    if(this.state.layoutExpanded) return;
+
+    this.state.layoutExpanded = true;
+
+    this.dom.layout.classList.add(
+        "winner-expanded"
+    );
+
+},
+
+
+goto(index){
 
     if(this.state.animating) return;
 
-    if(index<0) return;
+    const total =
+        this.dom.views.length;
 
-    if(index>=this.dom.views.length) return;
 
-    if(index===this.state.activeIndex) return;
+    if(index < 0){
+
+        index = total - 1;
+
+    }
+
+
+    if(index >= total){
+
+        index = 0;
+
+    }
+
+
+    if(index === this.state.activeIndex) return;
+
 
     this.changeView(index);
+
+    canNavigate(direction){
+
+    const viewer = this.dom.viewer;
+    if(!viewer) return true;
+
+    const active =
+        this.dom.views[this.state.activeIndex];
+
+    if(!active) return true;
+
+    const scrollable =
+        active.querySelector(".winner-view-scroll");
+
+    if(!scrollable) return true;
+
+    const top =
+        scrollable.scrollTop;
+
+    const max =
+        scrollable.scrollHeight -
+        scrollable.clientHeight;
+
+    if(direction > 0){
+
+        return top >= max - 2;
+
+    }
+
+    return top <= 2;
+
+},
 
 },
 
@@ -272,55 +345,69 @@ scrollToView(index){
 },
 
 
+canChangeSection(direction){
+
+    const view = this.getActiveView();
+
+    if(!view) return true;
+
+
+    const maxScroll =
+        view.scrollHeight - view.clientHeight;
+
+
+    if(direction > 0){
+
+        return view.scrollTop >= maxScroll - 2;
+
+    }
+
+
+    return view.scrollTop <= 2;
+
+},
+
+scrollActiveView(delta){
+
+    const view = this.getActiveView();
+
+    if(!view) return;
+
+    view.scrollBy({
+
+        top:delta,
+
+        behavior:"smooth"
+
+    });
+
+},
+
 
 watchScroll(){
 
     if(this.state.scrollHandler){
 
         this.dom.viewer.removeEventListener(
-
             "scroll",
-
             this.state.scrollHandler
-
         );
 
     }
 
+    cancelAnimationFrame(
+        this.state.scrollRAF
+    );
+
+    this.state.lastScrollTop =
+        this.dom.viewer.scrollTop;
 
     this.state.scrollHandler = ()=>{
 
-        if(!this.state.animating){
-
-            return;
-
-        }
-
-
-        const current =
+        this.state.lastScrollTop =
             this.dom.viewer.scrollTop;
 
-
-        const target =
-            this.state.targetScroll;
-
-
-        if(
-
-            Math.abs(current - target)
-
-            <=
-
-            this.config.scrollTolerance
-
-        ){
-
-            this.afterChange();
-
-        }
-
     };
-
 
     this.dom.viewer.addEventListener(
 
@@ -332,13 +419,40 @@ watchScroll(){
 
     );
 
-    clearTimeout(this.state.scrollTimeout);
+    const monitor = ()=>{
 
-this.state.scrollTimeout = setTimeout(()=>{
+        if(!this.state.animating){
+            return;
+        }
 
-    this.afterChange();
+        const current =
+            this.dom.viewer.scrollTop;
 
-},700);
+        const target =
+            this.state.targetScroll;
+
+        if(
+
+            Math.abs(current-target)
+
+            <=
+
+            this.config.scrollTolerance
+
+        ){
+
+            this.afterChange();
+            return;
+
+        }
+
+        this.state.scrollRAF =
+            requestAnimationFrame(monitor);
+
+    };
+
+    this.state.scrollRAF =
+        requestAnimationFrame(monitor);
 
 },
 
@@ -366,6 +480,12 @@ afterChange(){
     }
 
     clearTimeout(this.state.scrollTimeout);
+
+    cancelAnimationFrame(
+    this.state.scrollRAF
+);
+
+this.state.scrollRAF = null;
 
 },
 
@@ -442,6 +562,12 @@ enableMobile(){
 
     });
 
+    this.dom.layout.classList.remove(
+    "winner-expanded"
+    );
+
+    this.state.layoutExpanded = false;
+
 },
 
 
@@ -471,6 +597,20 @@ disableMobile(){
     this.updateAccordion(
         this.state.activeIndex
     );
+
+    if(this.state.firstInteraction){
+
+    this.dom.layout.classList.remove(
+        "winner-expanded"
+    );
+
+    }else{
+
+    this.dom.layout.classList.add(
+        "winner-expanded"
+    );
+
+}
 
 },
 
@@ -573,24 +713,42 @@ onWheel(e){
 
     if(this.state.animating) return;
 
-    if(this.state.wheelLocked) return;
-
     e.preventDefault();
 
-    if(e.deltaY>0){
+    if(!this.state.layoutExpanded){
+
+        this.expandLayout();
+
+        return;
+
+    }
+
+    if(e.deltaY > 0){
+
+        if(!this.canChangeSection(1)){
+
+            this.scrollActiveView(e.deltaY);
+
+        return;
+
+        }
 
         this.goto(
-
-            this.state.activeIndex+1
-
+            this.state.activeIndex + 1
         );
 
     }else{
 
+        if(!this.canChangeSection(-1)){
+
+            this.scrollActiveView(e.deltaY);
+
+        return;
+
+        }
+
         this.goto(
-
-            this.state.activeIndex-1
-
+            this.state.activeIndex - 1
         );
 
     }
