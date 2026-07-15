@@ -1,26 +1,22 @@
 /* ==========================================================
-   WINNER ENGINE V3
-   CORE ARCHITECTURE
+   WINNER ENGINE V3.0.5
 ========================================================== */
 
 (function(){
 
 "use strict";
 
-
 const WinnerEngine = {
 
+config:{
 
-    config:{
+    accordionDelay:180,
 
-    scrollDuration:500,
-
-    accordionDelay:180
+    scrollTolerance:2
 
 },
 
-
-    state:{
+state:{
 
     device:"desktop",
 
@@ -38,11 +34,13 @@ const WinnerEngine = {
 
     wheelLocked:false,
 
+    targetScroll:0,
+
+    scrollHandler:null
+
 },
 
-    
-    dom:{
-
+dom:{
 
     layout:null,
 
@@ -54,19 +52,17 @@ const WinnerEngine = {
 
     indicator:null,
 
-
     views:[],
-
 
     sections:[]
 
-
 },
 
-
-    init(){
+init(){
 
     this.cacheDOM();
+
+    if(!this.dom.layout) return;
 
     this.bindEvents();
 
@@ -75,77 +71,56 @@ const WinnerEngine = {
 
     this.state.initialized = true;
 
+    this.updateLayout();
+
     this.updateViews(
-    this.state.activeIndex
-);
+        this.state.activeIndex
+    );
 
     this.updateAccordion(
-    this.state.activeIndex
-);
-
-    this.updateLayout();
+        this.state.activeIndex
+    );
 
     this.checkResponsive();
 
-    console.log("Winner Engine v3 initialized");
+    console.log(
+        "Winner Engine v3.0.5"
+    );
 
 },
-
 
 cacheDOM(){
 
-
-    
     this.dom.layout =
-        document.querySelector(
-            ".winner-layout"
-        );
-
+        document.querySelector(".winner-layout");
 
     if(!this.dom.layout) return;
 
-
     this.dom.viewer =
-        this.dom.layout.querySelector(
-            ".winner-viewer"
-        );
-
+        this.dom.layout.querySelector(".winner-viewer");
 
     this.dom.accordion =
-        this.dom.layout.querySelector(
-            ".winner-accordion"
-        );
-
+        this.dom.layout.querySelector(".winner-accordion");
 
     this.dom.rail =
-        this.dom.layout.querySelector(
-            ".winner-rail"
-        );
-
+        this.dom.layout.querySelector(".winner-rail");
 
     this.dom.indicator =
-        this.dom.layout.querySelector(
-            ".winner-indicator"
-        );
+        this.dom.layout.querySelector(".winner-indicator");
 
+    this.dom.views = [
+        ...this.dom.layout.querySelectorAll(".winner-view")
+    ];
 
-    this.dom.views =
-        [...this.dom.layout.querySelectorAll(
-            ".winner-view"
-        )];
-
-
-    this.dom.sections =
-        [...this.dom.layout.querySelectorAll(
-            ".winner-section"
-        )];
-
+    this.dom.sections = [
+        ...this.dom.layout.querySelectorAll(".winner-section")
+    ];
 
 },
 
-updateViews(index){
 
-    this.state.activeIndex = index;
+
+updateViews(index){
 
     this.dom.views.forEach((view,i)=>{
 
@@ -177,49 +152,31 @@ updateViews(index){
 
 },
 
+
+
 updateAccordion(index){
-
-    this.state.activeIndex = index;
-
 
     this.dom.sections.forEach((section,i)=>{
 
-
         const body =
-            section.querySelector(
-                ".winner-body"
-            );
-
+            section.querySelector(".winner-body");
 
         if(!body) return;
 
-
         if(i===index){
 
-
-            section.classList.add(
-                "active"
-            );
-
+            section.classList.add("active");
 
             body.style.height =
-                body.scrollHeight + "px";
-
+                body.scrollHeight+"px";
 
         }else{
 
+            section.classList.remove("active");
 
-            section.classList.remove(
-                "active"
-            );
-
-
-            body.style.height =
-                "0px";
-
+            body.style.height="0px";
 
         }
-
 
     });
 
@@ -241,18 +198,27 @@ goto(index){
 
 },
 
+
+
 changeView(index){
 
     this.beforeChange(
+
         this.state.activeIndex,
+
         index
+
     );
 
 },
 
+
+
 beforeChange(oldIndex,newIndex){
 
     this.state.animating = true;
+
+    this.state.wheelLocked = true;
 
     this.state.activeIndex = newIndex;
 
@@ -264,10 +230,11 @@ beforeChange(oldIndex,newIndex){
 
 },
 
+
+
 scrollToView(index){
 
-    const view =
-        this.dom.views[index];
+    const view = this.dom.views[index];
 
     if(!view){
 
@@ -277,40 +244,145 @@ scrollToView(index){
 
     }
 
+
+    const rect =
+        view.getBoundingClientRect();
+
+
+    const viewerRect =
+        this.dom.viewer.getBoundingClientRect();
+
+
+    this.state.targetScroll =
+        this.dom.viewer.scrollTop +
+        (rect.top - viewerRect.top);
+
+
+
     this.dom.viewer.scrollTo({
 
-        top:view.offsetTop,
+        top:this.state.targetScroll,
 
         behavior:"smooth"
 
     });
 
-    setTimeout(()=>{
 
-        this.afterChange();
-
-    },this.config.scrollDuration);
+    this.watchScroll();
 
 },
+
+
+
+watchScroll(){
+
+    this.dom.viewer.addEventListener(
+
+    "scroll",
+
+    this.state.scrollHandler,
+
+    {passive:true}
+
+);
+
+},
+
+
+    this.state.scrollHandler = ()=>{
+
+        if(!this.state.animating){
+
+        return;
+
+    }
+
+        const current =
+            this.dom.viewer.scrollTop;
+
+
+        const target =
+            this.state.targetScroll;
+
+
+
+        if(
+
+            Math.abs(current-target)
+
+            <=
+
+            this.config.scrollTolerance
+
+        ){
+
+            this.dom.viewer.removeEventListener(
+
+                "scroll",
+
+                this.state.scrollHandler
+
+            );
+
+
+            this.state.scrollHandler = null;
+
+
+            this.afterChange();
+
+        }
+
+
+    };
+
+
+    if(this.state.scrollHandler){
+
+    this.dom.viewer.removeEventListener(
+
+        "scroll",
+
+        this.state.scrollHandler
+
+    );
+
+    this.state.scrollHandler = null;
+
+}
+
+},
+
+
 
 afterChange(){
 
     this.state.animating = false;
 
+    this.state.wheelLocked = false;
+
+    if(this.state.scrollHandler){
+
+    this.dom.viewer.removeEventListener(
+
+        "scroll",
+
+        this.state.scrollHandler
+
+    );
+
+    this.state.scrollHandler = null;
+
+}
+
 },
 
 updateLayout(){
 
-    if(!this.dom.layout) return;
-
-
     this.state.viewportHeight =
         window.innerHeight;
 
-
     this.dom.layout.style.height =
         this.state.viewportHeight + "px";
-
 
     if(this.dom.viewer){
 
@@ -320,6 +392,8 @@ updateLayout(){
     }
 
 },
+
+
 
 checkResponsive(){
 
@@ -345,6 +419,7 @@ checkResponsive(){
     }
 
 },
+
 
 
 enableMobile(){
@@ -375,6 +450,7 @@ enableMobile(){
 },
 
 
+
 disableMobile(){
 
     this.state.mobile = false;
@@ -402,6 +478,7 @@ disableMobile(){
 },
 
 
+
 bindEvents(){
 
     window.addEventListener(
@@ -409,43 +486,45 @@ bindEvents(){
         ()=>this.onResize()
     );
 
+    if(this.dom.viewer){
+    
     this.dom.viewer.addEventListener(
 
-    "wheel",
+        "wheel",
 
-    (e)=>this.onWheel(e),
+        (e)=>this.onWheel(e),
 
-    {passive:false}
+        {passive:false}
 
     );
-
+    }
 
     this.dom.sections.forEach((section,index)=>{
-
 
         const header =
             section.querySelector(
                 ".winner-header"
             );
 
-
         if(!header) return;
 
-
         header.addEventListener(
+
             "click",
+
             ()=>{
 
                 this.goto(index);
 
             }
-        );
 
+        );
 
     });
 
-
 },
+
+
 
 onResize(){
 
@@ -455,6 +534,8 @@ onResize(){
 
 },
 
+
+
 onWheel(e){
 
     if(this.state.mobile) return;
@@ -463,33 +544,25 @@ onWheel(e){
 
     if(this.state.wheelLocked) return;
 
-
     e.preventDefault();
-
-
-    this.state.wheelLocked = true;
-
 
     if(e.deltaY>0){
 
         this.goto(
+
             this.state.activeIndex+1
+
         );
 
     }else{
 
         this.goto(
+
             this.state.activeIndex-1
+
         );
 
     }
-
-
-    setTimeout(()=>{
-
-        this.state.wheelLocked = false;
-
-    },this.config.scrollDuration);
 
 },
 
@@ -498,7 +571,9 @@ onWheel(e){
 
 
 
-window.WinnerEngine = WinnerEngine;
+window.WinnerEngine =
+    WinnerEngine;
+
 
 
 WinnerEngine.init();
@@ -506,4 +581,3 @@ WinnerEngine.init();
 
 
 })();
-
