@@ -27,6 +27,8 @@ const WinnerEngine = {
 
     initialized:false
 
+    wheelLocked:false,
+
 },
 
 
@@ -398,6 +400,16 @@ bindEvents(){
         ()=>this.onResize()
     );
 
+    this.dom.viewer.addEventListener(
+
+    "wheel",
+
+    (e)=>this.onWheel(e),
+
+    {passive:false}
+
+    );
+
 
     this.dom.sections.forEach((section,index)=>{
 
@@ -431,6 +443,44 @@ onResize(){
     this.updateLayout();
 
     this.checkResponsive();
+
+},
+
+onWheel(e){
+
+    if(this.state.mobile) return;
+
+    if(this.state.animating) return;
+
+    if(this.state.wheelLocked) return;
+
+
+    e.preventDefault();
+
+
+    this.state.wheelLocked = true;
+
+
+    if(e.deltaY>0){
+
+        this.goto(
+            this.state.activeIndex+1
+        );
+
+    }else{
+
+        this.goto(
+            this.state.activeIndex-1
+        );
+
+    }
+
+
+    setTimeout(()=>{
+
+        this.state.wheelLocked = false;
+
+    },600);
 
 },
 
