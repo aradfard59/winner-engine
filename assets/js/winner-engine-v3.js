@@ -16,6 +16,7 @@ config:{
 
 },
 
+
 state:{
 
     device:"desktop",
@@ -26,19 +27,26 @@ state:{
 
     animating:false,
 
-    expanded:false,
-
     viewportHeight:0,
-
-    initialized:false,
 
     wheelLocked:false,
 
     targetScroll:0,
 
-    scrollHandler:null
+    scrollHandler:null,
+
+    scrollTimeout:null,
+
+    touchStartY:0,
+
+    touchCurrentY:0,
+
+    touchActive:false,
+
+    swipeThreshold:60
 
 },
+
 
 dom:{
 
@@ -58,6 +66,8 @@ dom:{
 
 },
 
+
+
 init(){
 
     this.cacheDOM();
@@ -68,8 +78,6 @@ init(){
 
     this.state.viewportHeight =
         window.innerHeight;
-
-    this.state.initialized = true;
 
     this.updateLayout();
 
@@ -184,7 +192,6 @@ updateAccordion(index){
 
 goto(index){
 
-    if(this.state.mobile) return;
 
     if(this.state.animating) return;
 
@@ -202,23 +209,15 @@ goto(index){
 
 changeView(index){
 
-    this.beforeChange(
-
-        this.state.activeIndex,
-
-        index
-
-    );
+    this.beforeChange(index);
 
 },
 
 
 
-beforeChange(oldIndex,newIndex){
+beforeChange(newIndex){
 
     this.state.animating = true;
-
-    this.state.wheelLocked = true;
 
     this.state.activeIndex = newIndex;
 
@@ -276,26 +275,27 @@ scrollToView(index){
 
 watchScroll(){
 
-    this.dom.viewer.addEventListener(
+    if(this.state.scrollHandler){
 
-    "scroll",
+        this.dom.viewer.removeEventListener(
 
-    this.state.scrollHandler,
+            "scroll",
 
-    {passive:true}
+            this.state.scrollHandler
 
-);
+        );
 
-},
+    }
 
 
     this.state.scrollHandler = ()=>{
 
         if(!this.state.animating){
 
-        return;
+            return;
 
-    }
+        }
+
 
         const current =
             this.dom.viewer.scrollTop;
@@ -305,10 +305,9 @@ watchScroll(){
             this.state.targetScroll;
 
 
-
         if(
 
-            Math.abs(current-target)
+            Math.abs(current - target)
 
             <=
 
@@ -316,39 +315,30 @@ watchScroll(){
 
         ){
 
-            this.dom.viewer.removeEventListener(
-
-                "scroll",
-
-                this.state.scrollHandler
-
-            );
-
-
-            this.state.scrollHandler = null;
-
-
             this.afterChange();
 
         }
 
-
     };
 
 
-    if(this.state.scrollHandler){
-
-    this.dom.viewer.removeEventListener(
+    this.dom.viewer.addEventListener(
 
         "scroll",
 
-        this.state.scrollHandler
+        this.state.scrollHandler,
+
+        {passive:true}
 
     );
 
-    this.state.scrollHandler = null;
+    clearTimeout(this.state.scrollTimeout);
 
-}
+this.state.scrollTimeout = setTimeout(()=>{
+
+    this.afterChange();
+
+},700);
 
 },
 
@@ -360,19 +350,22 @@ afterChange(){
 
     this.state.wheelLocked = false;
 
+
     if(this.state.scrollHandler){
 
-    this.dom.viewer.removeEventListener(
+        this.dom.viewer.removeEventListener(
 
-        "scroll",
+            "scroll",
 
-        this.state.scrollHandler
+            this.state.scrollHandler
 
-    );
+        );
 
-    this.state.scrollHandler = null;
+        this.state.scrollHandler = null;
 
-}
+    }
+
+    clearTimeout(this.state.scrollTimeout);
 
 },
 
@@ -428,6 +421,8 @@ enableMobile(){
 
     this.state.device = "mobile";
 
+    this.updateLayout();
+
     this.dom.layout.classList.add(
         "winner-mobile"
     );
@@ -456,6 +451,8 @@ disableMobile(){
     this.state.mobile = false;
 
     this.state.device = "desktop";
+
+    this.updateLayout();
 
     this.dom.layout.classList.remove(
         "winner-mobile"
@@ -498,6 +495,40 @@ bindEvents(){
 
     );
     }
+
+    if(this.dom.viewer){
+
+    this.dom.viewer.addEventListener(
+
+        "touchstart",
+
+        (e)=>this.onTouchStart(e),
+
+        {passive:true}
+
+    );
+
+    this.dom.viewer.addEventListener(
+
+        "touchmove",
+
+        (e)=>this.onTouchMove(e),
+
+        {passive:true}
+
+    );
+
+    this.dom.viewer.addEventListener(
+
+        "touchend",
+
+        ()=>this.onTouchEnd(),
+
+        {passive:true}
+
+    );
+
+}
 
     this.dom.sections.forEach((section,index)=>{
 
@@ -547,6 +578,81 @@ onWheel(e){
     e.preventDefault();
 
     if(e.deltaY>0){
+
+        this.goto(
+
+            this.state.activeIndex+1
+
+        );
+
+    }else{
+
+        this.goto(
+
+            this.state.activeIndex-1
+
+        );
+
+    }
+
+},
+
+    onTouchStart(e){
+
+    if(!this.state.mobile) return;
+
+    if(this.state.animating) return;
+
+    this.state.touchActive = true;
+
+    this.state.touchStartY =
+        e.touches[0].clientY;
+
+    this.state.touchCurrentY =
+        this.state.touchStartY;
+
+},
+
+
+
+onTouchMove(e){
+
+    if(!this.state.touchActive) return;
+
+    this.state.touchCurrentY =
+        e.touches[0].clientY;
+
+},
+
+
+
+onTouchEnd(){
+
+    if(!this.state.touchActive) return;
+
+    this.state.touchActive = false;
+
+    const delta =
+
+        this.state.touchStartY -
+
+        this.state.touchCurrentY;
+
+    if(
+
+        Math.abs(delta)
+
+        <
+
+        this.state.swipeThreshold
+
+    ){
+
+        return;
+
+    }
+
+    if(delta>0){
 
         this.goto(
 
